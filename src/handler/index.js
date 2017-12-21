@@ -11,11 +11,16 @@ if (USE_CHATBASE) {
     .setPlatform('Facebook'); // The platform you are interacting with the user over
 }
 
+Object.entries(actions).forEach(([name, fn]) => {
+  Object.defineProperty(fn, 'name', { value: name });
+});
+
 module.exports = async context => {
   const intent = await recognizer(context.state, context.event);
 
   // log intent to chatbase or other service here
   console.log(intent);
+
   if (USE_CHATBASE) {
     chatbase
       .setAsTypeUser()
@@ -29,14 +34,22 @@ module.exports = async context => {
       .catch(console.error);
   }
 
-  switch (intent.name) {
-    case 'GREETING':
-      await actions.sendHello(context);
-      break;
-    case '心情平淡':
-      await actions.sendGan(context);
-      break;
-    default:
-      await actions.sendSorry(context);
+  const map = {
+    GREETING: actions.sendHello,
+    心情平淡: actions.sendGan,
+  };
+
+  const action = map[intent.name] || actions.sendSorry;
+
+  if (USE_CHATBASE) {
+    chatbase
+      .setAsTypeAgent()
+      .setUserId(context.session.user.id)
+      .setMessage(action.name || intent.name)
+      .setTimestamp(Date.now().toString())
+      .send()
+      .catch(console.error);
   }
+
+  await action(context);
 };

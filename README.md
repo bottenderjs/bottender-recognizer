@@ -2,6 +2,6 @@
 
 ## files
 
-- `src/handler/index.js` - handler entry.
-- `src/handler/actions.js` - all of actions.
-- `src/handler/classifer.js` - intent classifer.
+* `src/handler/index.js` - handler entry.
+* `src/handler/actions.js` - all of actions.
+* `src/handler/recognizer.js` - intent recognizer.

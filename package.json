@@ -7,8 +7,11 @@
     "start": "node src/index.js"
   },
   "dependencies": {
-    "bottender": "0.14.7",
-    "bottender-compose": "^0.1.1"
+    "@google/chatbase": "^1.0.0",
+    "bottender": "0.14.11",
+    "bottender-compose": "^0.5.1",
+    "delay": "^2.0.0",
+    "ynlu": "0.2.0"
   },
   "devDependencies": {
     "nodemon": "^1.12.4"

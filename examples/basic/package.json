@@ -1,0 +1,17 @@
+{
+  "private": true,
+  "name": "example-basic",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "bottender": "latest",
+    "bottender-compose": "latest",
+    "bottender-recognizer": "latest",
+    "ynlu": "0.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.12.4"
+  }
+}

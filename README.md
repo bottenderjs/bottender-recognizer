@@ -17,7 +17,7 @@ npm install bottender-recognizer
 ### Recognizer
 
 ```
-(state, event) => intent | undefiend
+(state, event) => intent | undefined
 ```
 
 ### Intent

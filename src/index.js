@@ -72,6 +72,7 @@ exports.createHandler = function createHandler({
     if (USE_CHATBASE) {
       _chatbase
         .setAsTypeAgent()
+        .newMessage()
         .setUserId(context.session.user.id)
         .setMessage(action.name || intent.name)
         .setTimestamp(Date.now().toString())

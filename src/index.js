@@ -66,7 +66,7 @@ exports.createHandler = function createHandler({
     const action = resolver(context.state, intent);
 
     if (debug) {
-      console.log('Action: ', action.name);
+      console.log('Action: ', action.displayName || action.name);
     }
 
     if (USE_CHATBASE) {
@@ -74,7 +74,7 @@ exports.createHandler = function createHandler({
         .setAsTypeAgent()
         .newMessage()
         .setUserId(context.session.user.id)
-        .setMessage(action.name || intent.name)
+        .setMessage(action.displayName || action.name || intent.name)
         .setTimestamp(Date.now().toString())
         .send()
         .catch(console.error);

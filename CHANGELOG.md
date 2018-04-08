@@ -1,3 +1,7 @@
+# 0.1.2 / 2018-04-09
+
+* [new] use `action.displayName` as action name when possible
+
 # 0.1.1 / 2018-01-10
 
 * Fix bug usage in setting agent messages

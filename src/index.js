@@ -42,7 +42,7 @@ exports.createHandler = function createHandler({
       .setPlatform(chatbase.platform); // The platform you are interacting with the user over
   }
 
-  return async context => {
+  return async (context, ...otherArgs) => {
     const intent = await recognizer(context.state, context.event);
 
     // log intent to chatbase or other service here
@@ -80,6 +80,6 @@ exports.createHandler = function createHandler({
         .catch(console.error);
     }
 
-    await action(context);
+    await action(context, ...otherArgs);
   };
 };

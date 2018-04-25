@@ -78,3 +78,23 @@ describe('#combineRecognizers', () => {
     await expect(intent).resolves.toEqual({ name: 'intent' });
   });
 });
+
+describe('#createHandler', () => {
+  it('should pass other args to targetHandler', async () => {
+    const targetHandler = jest.fn();
+    const recognizer = () => Promise.resolve({ name: 'intent' });
+    const resolver = () => targetHandler;
+    const context = {
+      state: {},
+      event: {},
+    };
+
+    const handler = createHandler({ recognizer, resolver });
+
+    const otherArg = {};
+
+    await handler(context, otherArg);
+
+    expect(targetHandler).toBeCalledWith(context, otherArg);
+  });
+});

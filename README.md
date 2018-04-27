@@ -1,7 +1,7 @@
 # bottender-recognizer
 
 [![npm](https://img.shields.io/npm/v/bottender-recognizer.svg?style=flat-square)](https://www.npmjs.com/package/bottender-recognizer)
-[![CircleCI](https://circleci.com/gh/Yoctol/bottender-recognizer.svg?style=shield)](https://circleci.com/gh/Yoctol/bottender-recognizer)
+[![CircleCI](https://circleci.com/gh/Yoctol/bottender-recognizer.svg?style=shield&circle-token=864a782187e3b51b95c9fdccf815b090fc4abb66)](https://circleci.com/gh/Yoctol/bottender-recognizer)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 > Build bottender bots with intent recognizer and action resolver.

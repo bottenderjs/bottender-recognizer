@@ -20,7 +20,8 @@
   },
   "dependencies": {
     "@google/chatbase": "^1.0.0",
-    "delay": "^2.0.0"
+    "delay": "^2.0.0",
+    "warning": "^3.0.0"
   },
   "devDependencies": {
     "eslint": "^4.13.1",

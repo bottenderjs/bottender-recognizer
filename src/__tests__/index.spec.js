@@ -1,6 +1,22 @@
 const delay = require('delay');
+const warning = require('warning');
 
 const { createHandler, combineRecognizers } = require('../');
+
+jest.mock('warning');
+
+function createContext() {
+  return {
+    state: {},
+    event: {},
+    setState(state) {
+      this.state = {
+        ...this.state,
+        ...state,
+      };
+    },
+  };
+}
 
 it('exports public apis', () => {
   expect(createHandler).toBeDefined();
@@ -14,10 +30,7 @@ describe('#combineRecognizers', () => {
       () => Promise.resolve({ name: 'intent' }),
     ]);
 
-    const context = {
-      state: {},
-      event: {},
-    };
+    const context = createContext();
 
     const intent = await recognizers(context.state, context.event);
 
@@ -30,10 +43,7 @@ describe('#combineRecognizers', () => {
       () => Promise.resolve(null),
     ]);
 
-    const context = {
-      state: {},
-      event: {},
-    };
+    const context = createContext();
 
     const intent = await recognizers(context.state, context.event);
 
@@ -46,10 +56,7 @@ describe('#combineRecognizers', () => {
       { timeout: 100 }
     );
 
-    const context = {
-      state: {},
-      event: {},
-    };
+    const context = createContext();
 
     const intent = recognizers(context.state, context.event);
     await Promise.resolve();
@@ -65,10 +72,7 @@ describe('#combineRecognizers', () => {
       { timeout: 500 }
     );
 
-    const context = {
-      state: {},
-      event: {},
-    };
+    const context = createContext();
 
     const intent = recognizers(context.state, context.event);
     await Promise.resolve();
@@ -84,10 +88,7 @@ describe('#createHandler', () => {
     const targetHandler = jest.fn();
     const recognizer = () => Promise.resolve({ name: 'intent' });
     const resolver = () => targetHandler;
-    const context = {
-      state: {},
-      event: {},
-    };
+    const context = createContext();
 
     const handler = createHandler({ recognizer, resolver });
 
@@ -96,5 +97,94 @@ describe('#createHandler', () => {
     await handler(context, otherArg);
 
     expect(targetHandler).toBeCalledWith(context, otherArg);
+  });
+
+  it('should warning when resolver resolve undefined', async () => {
+    const recognizer = () => Promise.resolve({ name: 'intent' });
+    const resolver = () => {};
+    const context = createContext();
+
+    const handler = createHandler({ recognizer, resolver });
+
+    await handler(context);
+
+    expect(warning).toBeCalled();
+  });
+
+  it('should support derivedState', async () => {
+    const targetHandler = jest.fn();
+    const recognizer = () => Promise.resolve({ name: 'intent' });
+    const resolver = () => ({
+      action: targetHandler,
+      derivedState: {
+        x: 1,
+      },
+    });
+    const context = createContext();
+
+    const handler = createHandler({ recognizer, resolver });
+
+    await handler(context);
+
+    expect(targetHandler.mock.calls[0][0].state).toEqual({
+      x: 1,
+    });
+  });
+
+  describe('derivedParam', () => {
+    it('should warning when second arg is not an object', async () => {
+      const targetHandler = jest.fn();
+      const recognizer = () => Promise.resolve({ name: 'intent' });
+      const resolver = () => ({
+        action: targetHandler,
+        derivedParam: {
+          x: 1,
+        },
+      });
+      const context = createContext();
+
+      const handler = createHandler({ recognizer, resolver });
+
+      await handler(context, 1);
+
+      expect(targetHandler).toBeCalledWith(context, 1);
+      expect(warning).toBeCalled();
+    });
+
+    it('should merge when second arg is an object', async () => {
+      const targetHandler = jest.fn();
+      const recognizer = () => Promise.resolve({ name: 'intent' });
+      const resolver = () => ({
+        action: targetHandler,
+        derivedParam: {
+          x: 1,
+        },
+      });
+      const context = createContext();
+
+      const handler = createHandler({ recognizer, resolver });
+
+      await handler(context, { y: 2 });
+
+      expect(targetHandler).toBeCalledWith(context, { x: 1, y: 2 });
+    });
+
+    it('should provide param when second arg is undefined', async () => {
+      const targetHandler = jest.fn();
+      const recognizer = () => Promise.resolve({ name: 'intent' });
+      const resolver = () => ({
+        action: targetHandler,
+        derivedParam: {
+          x: 1,
+        },
+      });
+      const context = createContext();
+
+      const handler = createHandler({ recognizer, resolver });
+
+      await handler(context);
+
+      expect(targetHandler).toBeCalledWith(context, { x: 1 });
+    });
   });
 });

@@ -1,4 +1,5 @@
 const delay = require('delay');
+const warning = require('warning');
 
 exports.combineRecognizers = function combineRecognizers(
   recognizers,
@@ -42,7 +43,7 @@ exports.createHandler = function createHandler({
       .setPlatform(chatbase.platform); // The platform you are interacting with the user over
   }
 
-  return async (context, ...otherArgs) => {
+  return async (context, arg, ...otherArgs) => {
     const intent = await recognizer(context.state, context.event);
 
     // log intent to chatbase or other service here
@@ -63,7 +64,27 @@ exports.createHandler = function createHandler({
         .catch(console.error);
     }
 
-    const action = resolver(context.state, intent);
+    const result = resolver(context.state, intent);
+
+    if (
+      !result ||
+      !(typeof result === 'object' || typeof result === 'function')
+    ) {
+      warning(false, 'resolver must return a function or an object.');
+      return;
+    }
+
+    let action;
+    let derivedState;
+    let derivedParam;
+
+    if (typeof result === 'object') {
+      action = result.action;
+      derivedState = result.derivedState;
+      derivedParam = result.derivedParam;
+    } else {
+      action = result;
+    }
 
     if (debug) {
       console.log('Action: ', action.displayName || action.name);
@@ -80,6 +101,26 @@ exports.createHandler = function createHandler({
         .catch(console.error);
     }
 
-    await action(context, ...otherArgs);
+    if (derivedState) {
+      context.setState(derivedState);
+    }
+
+    if (!derivedParam) {
+      await action(context, arg, ...otherArgs);
+      return;
+    }
+    if (arg && typeof arg !== 'object') {
+      warning(
+        false,
+        'should not provide non-object type param with derivedParam. derivedParam will not be applied.'
+      );
+      await action(context, arg, ...otherArgs);
+    } else {
+      const param = {
+        ...arg,
+        ...derivedParam,
+      };
+      await action(context, param, ...otherArgs);
+    }
   };
 };

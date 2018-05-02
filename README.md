@@ -20,7 +20,21 @@ npm install bottender-recognizer
 (state, event) => intent | undefined
 ```
 
+Example:
+
+```js
+async (state, intent) => ({
+  name: 'INTENT_NAME',
+  payload: {},
+});
+```
+
 ### Intent
+
+* `name` - Must have.
+* `payload` - Recommended.
+
+Example:
 
 ```js
 {
@@ -35,10 +49,58 @@ npm install bottender-recognizer
 (state, intent) => action
 ```
 
+Example:
+
+```js
+(state, intent) => doSomething;
+```
+
+With `derivedState` and `derivedParam`:
+
+```
+(state, intent) => derivedState + derivedParam + action
+```
+
+Example:
+
+```js
+(state, intent) => ({
+  action: doSomething,
+  derivedState: {
+    x: 1,
+  },
+  derivedParam: {
+    y: 2,
+  },
+});
+```
+
 ### Action
 
 ```
 context => void
+```
+
+Example:
+
+```js
+async context => {
+  // ...
+};
+```
+
+With parameters:
+
+```
+context + param => void
+```
+
+Example:
+
+```js
+async (context, param) => {
+  // ...
+};
 ```
 
 ## API Reference

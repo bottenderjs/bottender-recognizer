@@ -1,3 +1,15 @@
+# 0.2.0 / 2018-05-02
+
+* [new] implement `derivedState` + `derivedParam`: [#15](https://github.com/Yoctol/bottender-recognizer/pull/15)
+
+```js
+const action = resolver(state, intent);
+const { action, derivedState, derivedParam } = resolver(state, intent);
+```
+
+* `derivedState` will be used to `setState` before action be executed.
+* `derivedParam` will be passed to action as second argument.
+
 # 0.1.3 / 2018-04-25
 
 * [fix] pass ...otherArgs to underlying handler

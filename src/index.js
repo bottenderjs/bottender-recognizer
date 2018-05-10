@@ -79,9 +79,7 @@ exports.createHandler = function createHandler({
     let derivedParam;
 
     if (typeof result === 'object') {
-      action = result.action;
-      derivedState = result.derivedState;
-      derivedParam = result.derivedParam;
+      ({ action, derivedState, derivedParam } = result);
     } else {
       action = result;
     }

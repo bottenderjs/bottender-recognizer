@@ -1,3 +1,7 @@
+# 0.2.1 / 2018-06-29
+
+* [fix] throw error when receiving LINE join group event.
+
 # 0.2.0 / 2018-05-02
 
 * [new] implement `derivedState` + `derivedParam`: [#15](https://github.com/Yoctol/bottender-recognizer/pull/15)

@@ -4,15 +4,23 @@ const warning = require('warning');
 const { createHandler, combineRecognizers } = require('../');
 
 jest.mock('warning');
+jest.mock('@google/chatbase', () => ({
+  setApiKey: jest.fn().mockReturnThis(),
+  setPlatform: jest.fn().mockReturnThis(),
+  setAsTypeUser: jest.fn().mockReturnThis(),
+  setAsTypeAgent: jest.fn().mockReturnThis(),
+  newMessage: jest.fn(),
+}));
 
-function createContext() {
+function createContext({ state = {}, event = {}, session = {} } = {}) {
   return {
-    state: {},
-    event: {},
-    setState(state) {
+    state,
+    event,
+    session,
+    setState(_state) {
       this.state = {
         ...this.state,
-        ...state,
+        ..._state,
       };
     },
   };
@@ -186,5 +194,122 @@ describe('#createHandler', () => {
 
       expect(targetHandler).toBeCalledWith(context, { x: 1 });
     });
+  });
+});
+
+describe('chatbase', () => {
+  it('should send message to chatbase', async () => {
+    const chatbase = require('@google/chatbase');
+
+    const userMessage = {
+      setUserId: jest.fn().mockReturnThis(),
+      setIntent: jest.fn().mockReturnThis(),
+      setMessage: jest.fn().mockReturnThis(),
+      setAsHandled: jest.fn().mockReturnThis(),
+      setTimestamp: jest.fn().mockReturnThis(),
+      send: jest.fn().mockResolvedValue(),
+    };
+    const agentMessage = {
+      setUserId: jest.fn().mockReturnThis(),
+      setMessage: jest.fn().mockReturnThis(),
+      setTimestamp: jest.fn().mockReturnThis(),
+      send: jest.fn().mockResolvedValue(),
+    };
+
+    chatbase.newMessage
+      .mockReturnValueOnce(userMessage)
+      .mockReturnValueOnce(agentMessage);
+
+    const targetHandler = jest.fn();
+    targetHandler.displayName = 'foobar';
+
+    const recognizer = () => Promise.resolve({ name: 'intent' });
+    const resolver = () => ({
+      action: targetHandler,
+    });
+    const context = createContext({
+      session: {
+        user: {
+          id: '1234567890',
+        },
+      },
+      event: {
+        text: 'hi',
+      },
+    });
+
+    const handler = createHandler({
+      recognizer,
+      resolver,
+      chatbase: {
+        apiKey: '<API_KEY>',
+        platform: 'Messenger',
+      },
+    });
+
+    await handler(context);
+
+    expect(chatbase.setApiKey).toBeCalledWith('<API_KEY>');
+    expect(chatbase.setPlatform).toBeCalledWith('Messenger');
+
+    expect(userMessage.setUserId).toBeCalledWith('1234567890');
+    expect(userMessage.setIntent).toBeCalledWith('intent');
+    expect(userMessage.setMessage).toBeCalledWith('hi');
+    expect(userMessage.setAsHandled).toBeCalled();
+    expect(userMessage.setTimestamp).toBeCalledWith(expect.any(String));
+    expect(userMessage.send).toBeCalled();
+
+    expect(agentMessage.setUserId).toBeCalledWith('1234567890');
+    expect(agentMessage.setMessage).toBeCalledWith('foobar');
+    expect(agentMessage.setTimestamp).toBeCalledWith(expect.any(String));
+    expect(agentMessage.send).toBeCalled();
+  });
+
+  it('should not throw when no session user', async () => {
+    const chatbase = require('@google/chatbase');
+
+    const userMessage = {
+      setUserId: jest.fn().mockReturnThis(),
+      setIntent: jest.fn().mockReturnThis(),
+      setMessage: jest.fn().mockReturnThis(),
+      setAsHandled: jest.fn().mockReturnThis(),
+      setTimestamp: jest.fn().mockReturnThis(),
+      send: jest.fn().mockResolvedValue(),
+    };
+    const agentMessage = {
+      setUserId: jest.fn().mockReturnThis(),
+      setMessage: jest.fn().mockReturnThis(),
+      setTimestamp: jest.fn().mockReturnThis(),
+      send: jest.fn().mockResolvedValue(),
+    };
+
+    chatbase.newMessage
+      .mockReturnValueOnce(userMessage)
+      .mockReturnValueOnce(agentMessage);
+
+    const targetHandler = jest.fn();
+    targetHandler.displayName = 'foobar';
+
+    const recognizer = () => Promise.resolve({ name: 'intent' });
+    const resolver = () => ({
+      action: targetHandler,
+    });
+    const context = createContext({
+      session: {},
+      event: {
+        text: 'hi',
+      },
+    });
+
+    const handler = createHandler({
+      recognizer,
+      resolver,
+      chatbase: {
+        apiKey: '<API_KEY>',
+        platform: 'Messenger',
+      },
+    });
+
+    await handler(context);
   });
 });

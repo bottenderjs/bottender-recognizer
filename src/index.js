@@ -55,7 +55,9 @@ exports.createHandler = function createHandler({
       _chatbase
         .setAsTypeUser()
         .newMessage()
-        .setUserId(context.session.user.id)
+        .setUserId(
+          (context.session.user && context.session.user.id) || 'Unknown'
+        )
         .setIntent(intent.name)
         .setMessage(context.event.text || context.event.payload || 'Unknown')
         .setAsHandled()
@@ -92,7 +94,9 @@ exports.createHandler = function createHandler({
       _chatbase
         .setAsTypeAgent()
         .newMessage()
-        .setUserId(context.session.user.id)
+        .setUserId(
+          (context.session.user && context.session.user.id) || 'Unknown'
+        )
         .setMessage(action.displayName || action.name || intent.name)
         .setTimestamp(Date.now().toString())
         .send()

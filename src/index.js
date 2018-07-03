@@ -114,15 +114,15 @@ exports.createHandler = function createHandler({
     if (arg && typeof arg !== 'object') {
       warning(
         false,
-        'should not provide non-object type param with derivedParam. derivedParam will not be applied.'
+        'should not provide non-object type arg with derivedParam. derivedParam will not be applied.'
       );
       await action(context, arg, ...otherArgs);
     } else {
-      const param = {
+      const mergedArg = {
         ...arg,
         ...derivedParam,
       };
-      await action(context, param, ...otherArgs);
+      await action(context, mergedArg, ...otherArgs);
     }
   };
 };

@@ -140,26 +140,24 @@ describe('#createHandler', () => {
   });
 
   describe('derivedParam', () => {
-    it('should warning when second arg is not an object', async () => {
+    it('should warning when derivedParam is not an object', async () => {
       const targetHandler = jest.fn();
       const recognizer = () => Promise.resolve({ name: 'intent' });
       const resolver = () => ({
         action: targetHandler,
-        derivedParam: {
-          x: 1,
-        },
+        derivedParam: 1,
       });
       const context = createContext();
 
       const handler = createHandler({ recognizer, resolver });
 
-      await handler(context, 1);
+      await handler(context, { y: 2 });
 
-      expect(targetHandler).toBeCalledWith(context, 1);
+      expect(targetHandler).toBeCalledWith(context, { y: 2 });
       expect(warning).toBeCalled();
     });
 
-    it('should merge when second arg is an object', async () => {
+    it('should merge when derivedParam is an object', async () => {
       const targetHandler = jest.fn();
       const recognizer = () => Promise.resolve({ name: 'intent' });
       const resolver = () => ({

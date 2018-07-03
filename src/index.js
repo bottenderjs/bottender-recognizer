@@ -111,7 +111,7 @@ exports.createHandler = function createHandler({
       await action(context, arg, ...otherArgs);
       return;
     }
-    if (arg && typeof arg !== 'object') {
+    if (typeof derivedParam !== 'object') {
       warning(
         false,
         'should not provide non-object type param with derivedParam. derivedParam will not be applied.'

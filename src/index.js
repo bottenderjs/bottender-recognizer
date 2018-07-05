@@ -1,5 +1,8 @@
 const delay = require('delay');
 const warning = require('warning');
+const _debug = require('debug');
+
+const chatbaseDebug = _debug('bottender-recognizer:chatbase');
 
 exports.combineRecognizers = function combineRecognizers(
   recognizers,
@@ -63,6 +66,10 @@ exports.createHandler = function createHandler({
         .setAsHandled()
         .setTimestamp(Date.now().toString())
         .send()
+        .then(message => {
+          chatbaseDebug(message.getCreateResponse());
+          return message;
+        })
         .catch(console.error);
     }
 
@@ -100,6 +107,10 @@ exports.createHandler = function createHandler({
         .setMessage(action.displayName || action.name || intent.name)
         .setTimestamp(Date.now().toString())
         .send()
+        .then(message => {
+          chatbaseDebug(message.getCreateResponse());
+          return message;
+        })
         .catch(console.error);
     }
 

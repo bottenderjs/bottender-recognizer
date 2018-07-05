@@ -55,22 +55,41 @@ exports.createHandler = function createHandler({
     }
 
     if (USE_CHATBASE) {
-      _chatbase
-        .setAsTypeUser()
-        .newMessage()
-        .setUserId(
-          (context.session.user && context.session.user.id) || 'Unknown'
-        )
-        .setIntent(intent.name)
-        .setMessage(context.event.text || context.event.payload || 'Unknown')
-        .setAsHandled()
-        .setTimestamp(Date.now().toString())
-        .send()
-        .then(message => {
-          chatbaseDebug(message.getCreateResponse());
-          return message;
-        })
-        .catch(console.error);
+      if (intent.name !== 'UNKNOWN') {
+        _chatbase
+          .setAsTypeUser()
+          .newMessage()
+          .setUserId(
+            (context.session.user && context.session.user.id) || 'Unknown'
+          )
+          .setIntent(intent.name)
+          .setMessage(context.event.text || context.event.payload || 'Unknown')
+          .setAsHandled()
+          .setTimestamp(Date.now().toString())
+          .send()
+          .then(message => {
+            chatbaseDebug(message.getCreateResponse());
+            return message;
+          })
+          .catch(console.error);
+      } else {
+        _chatbase
+          .setAsTypeUser()
+          .newMessage()
+          .setUserId(
+            (context.session.user && context.session.user.id) || 'Unknown'
+          )
+          .setIntent('UNKNOWN')
+          .setMessage(context.event.text || context.event.payload || 'Unknown')
+          .setAsNotHandled()
+          .setTimestamp(Date.now().toString())
+          .send()
+          .then(message => {
+            chatbaseDebug(message.getCreateResponse());
+            return message;
+          })
+          .catch(console.error);
+      }
     }
 
     const result = resolver(context.state, intent);

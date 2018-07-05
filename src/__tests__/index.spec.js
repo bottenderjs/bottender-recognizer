@@ -107,6 +107,22 @@ describe('#createHandler', () => {
     expect(targetHandler).toBeCalledWith(context, otherArg);
   });
 
+  it('should warn when pass function as other args', async () => {
+    const targetHandler = jest.fn();
+    const recognizer = () => Promise.resolve({ name: 'intent' });
+    const resolver = () => targetHandler;
+    const context = createContext();
+
+    const handler = createHandler({ recognizer, resolver });
+
+    const otherArg = function arg() {};
+
+    await handler(context, otherArg);
+
+    expect(warning).toBeCalledWith(false, expect.any(String));
+    expect(targetHandler).toBeCalledWith(context, undefined);
+  });
+
   it('should warning when resolver resolve undefined', async () => {
     const recognizer = () => Promise.resolve({ name: 'intent' });
     const resolver = () => {};

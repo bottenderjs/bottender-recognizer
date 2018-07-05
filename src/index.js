@@ -107,6 +107,14 @@ exports.createHandler = function createHandler({
       context.setState(derivedState);
     }
 
+    if (typeof arg === 'function') {
+      warning(
+        false,
+        'should not pass function type arg. It will be ignored by handler. You may accidentally pass middleware next function as arg.'
+      );
+      arg = undefined;
+    }
+
     if (!derivedParam) {
       await action(context, arg, ...otherArgs);
       return;

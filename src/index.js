@@ -55,7 +55,7 @@ exports.createHandler = function createHandler({
     }
 
     if (USE_CHATBASE) {
-      _chatbase
+      let chatbaseMessage = _chatbase
         .setAsTypeUser()
         .newMessage()
         .setUserId(
@@ -63,8 +63,14 @@ exports.createHandler = function createHandler({
         )
         .setIntent(intent.name)
         .setMessage(context.event.text || context.event.payload || 'Unknown')
-        .setAsHandled()
-        .setTimestamp(Date.now().toString())
+        .setTimestamp(Date.now().toString());
+
+      chatbaseMessage =
+        intent.name === 'UNKNOWN'
+          ? chatbaseMessage.setAsNotHandled()
+          : chatbaseMessage.setAsHandled();
+
+      chatbaseMessage
         .send()
         .then(message => {
           chatbaseDebug(message.getCreateResponse());

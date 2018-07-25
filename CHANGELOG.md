@@ -1,3 +1,9 @@
+# 0.2.2 / 2018-07-25
+
+* [new] add debug for chatbase
+* [new] warn when pass func arg (#25)
+* [new] set `UNKNOWN` intent as not handled
+
 # 0.2.1 / 2018-06-29
 
 * [fix] throw error when receiving LINE join group event.

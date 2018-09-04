@@ -12,8 +12,14 @@ jest.mock('@google/chatbase', () => ({
   newMessage: jest.fn(),
 }));
 
-function createContext({ state = {}, event = {}, session = {} } = {}) {
+function createContext({
+  platform,
+  state = {},
+  event = {},
+  session = {},
+} = {}) {
   return {
+    platform,
     state,
     event,
     session,
@@ -218,6 +224,8 @@ describe('chatbase', () => {
     const chatbase = require('@google/chatbase');
 
     const userMessage = {
+      setPlatform: jest.fn().mockReturnThis(),
+      setAsTypeUser: jest.fn().mockReturnThis(),
       setUserId: jest.fn().mockReturnThis(),
       setIntent: jest.fn().mockReturnThis(),
       setMessage: jest.fn().mockReturnThis(),
@@ -226,13 +234,16 @@ describe('chatbase', () => {
       send: jest.fn().mockResolvedValue(),
     };
     const agentMessage = {
+      setPlatform: jest.fn().mockReturnThis(),
+      setAsTypeAgent: jest.fn().mockReturnThis(),
       setUserId: jest.fn().mockReturnThis(),
       setMessage: jest.fn().mockReturnThis(),
       setTimestamp: jest.fn().mockReturnThis(),
       send: jest.fn().mockResolvedValue(),
     };
 
-    chatbase.newMessage
+    chatbase.newMessage = jest
+      .fn()
       .mockReturnValueOnce(userMessage)
       .mockReturnValueOnce(agentMessage);
 
@@ -265,9 +276,10 @@ describe('chatbase', () => {
 
     await handler(context);
 
-    expect(chatbase.setApiKey).toBeCalledWith('<API_KEY>');
-    expect(chatbase.setPlatform).toBeCalledWith('Messenger');
+    expect(chatbase.newMessage).toBeCalledWith('<API_KEY>');
 
+    expect(userMessage.setAsTypeUser).toBeCalled();
+    expect(userMessage.setPlatform).toBeCalledWith('Messenger');
     expect(userMessage.setUserId).toBeCalledWith('1234567890');
     expect(userMessage.setIntent).toBeCalledWith('intent');
     expect(userMessage.setMessage).toBeCalledWith('hi');
@@ -275,6 +287,83 @@ describe('chatbase', () => {
     expect(userMessage.setTimestamp).toBeCalledWith(expect.any(String));
     expect(userMessage.send).toBeCalled();
 
+    expect(agentMessage.setAsTypeAgent).toBeCalled();
+    expect(agentMessage.setPlatform).toBeCalledWith('Messenger');
+    expect(agentMessage.setUserId).toBeCalledWith('1234567890');
+    expect(agentMessage.setMessage).toBeCalledWith('foobar');
+    expect(agentMessage.setTimestamp).toBeCalledWith(expect.any(String));
+    expect(agentMessage.send).toBeCalled();
+  });
+
+  it('should send message to chatbase with platform in context when no platform given in settings', async () => {
+    const chatbase = require('@google/chatbase');
+
+    const userMessage = {
+      setPlatform: jest.fn().mockReturnThis(),
+      setAsTypeUser: jest.fn().mockReturnThis(),
+      setUserId: jest.fn().mockReturnThis(),
+      setIntent: jest.fn().mockReturnThis(),
+      setMessage: jest.fn().mockReturnThis(),
+      setAsHandled: jest.fn().mockReturnThis(),
+      setTimestamp: jest.fn().mockReturnThis(),
+      send: jest.fn().mockResolvedValue(),
+    };
+    const agentMessage = {
+      setPlatform: jest.fn().mockReturnThis(),
+      setAsTypeAgent: jest.fn().mockReturnThis(),
+      setUserId: jest.fn().mockReturnThis(),
+      setMessage: jest.fn().mockReturnThis(),
+      setTimestamp: jest.fn().mockReturnThis(),
+      send: jest.fn().mockResolvedValue(),
+    };
+
+    chatbase.newMessage = jest
+      .fn()
+      .mockReturnValueOnce(userMessage)
+      .mockReturnValueOnce(agentMessage);
+
+    const targetHandler = jest.fn();
+    targetHandler.displayName = 'foobar';
+
+    const recognizer = () => Promise.resolve({ name: 'intent' });
+    const resolver = () => ({
+      action: targetHandler,
+    });
+    const context = createContext({
+      platform: 'line',
+      session: {
+        user: {
+          id: '1234567890',
+        },
+      },
+      event: {
+        text: 'hi',
+      },
+    });
+
+    const handler = createHandler({
+      recognizer,
+      resolver,
+      chatbase: {
+        apiKey: '<API_KEY>',
+      },
+    });
+
+    await handler(context);
+
+    expect(chatbase.newMessage).toBeCalledWith('<API_KEY>');
+
+    expect(userMessage.setAsTypeUser).toBeCalled();
+    expect(userMessage.setPlatform).toBeCalledWith('line');
+    expect(userMessage.setUserId).toBeCalledWith('1234567890');
+    expect(userMessage.setIntent).toBeCalledWith('intent');
+    expect(userMessage.setMessage).toBeCalledWith('hi');
+    expect(userMessage.setAsHandled).toBeCalled();
+    expect(userMessage.setTimestamp).toBeCalledWith(expect.any(String));
+    expect(userMessage.send).toBeCalled();
+
+    expect(agentMessage.setAsTypeAgent).toBeCalled();
+    expect(agentMessage.setPlatform).toBeCalledWith('line');
     expect(agentMessage.setUserId).toBeCalledWith('1234567890');
     expect(agentMessage.setMessage).toBeCalledWith('foobar');
     expect(agentMessage.setTimestamp).toBeCalledWith(expect.any(String));
@@ -285,6 +374,8 @@ describe('chatbase', () => {
     const chatbase = require('@google/chatbase');
 
     const userMessage = {
+      setPlatform: jest.fn().mockReturnThis(),
+      setAsTypeUser: jest.fn().mockReturnThis(),
       setUserId: jest.fn().mockReturnThis(),
       setIntent: jest.fn().mockReturnThis(),
       setMessage: jest.fn().mockReturnThis(),
@@ -293,13 +384,16 @@ describe('chatbase', () => {
       send: jest.fn().mockResolvedValue(),
     };
     const agentMessage = {
+      setPlatform: jest.fn().mockReturnThis(),
+      setAsTypeAgent: jest.fn().mockReturnThis(),
       setUserId: jest.fn().mockReturnThis(),
       setMessage: jest.fn().mockReturnThis(),
       setTimestamp: jest.fn().mockReturnThis(),
       send: jest.fn().mockResolvedValue(),
     };
 
-    chatbase.newMessage
+    chatbase.newMessage = jest
+      .fn()
       .mockReturnValueOnce(userMessage)
       .mockReturnValueOnce(agentMessage);
 
@@ -320,10 +414,7 @@ describe('chatbase', () => {
     const handler = createHandler({
       recognizer,
       resolver,
-      chatbase: {
-        apiKey: '<API_KEY>',
-        platform: 'Messenger',
-      },
+      chatbase: { apiKey: '<API_KEY>' },
     });
 
     await handler(context);

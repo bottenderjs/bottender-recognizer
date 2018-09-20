@@ -36,14 +36,12 @@ exports.createHandler = function createHandler({
   chatbase,
   debug,
 }) {
-  const USE_CHATBASE = chatbase && chatbase.apiKey && chatbase.platform && true;
+  const USE_CHATBASE = chatbase && chatbase.apiKey && true;
 
   let _chatbase;
 
   if (USE_CHATBASE) {
-    _chatbase = require('@google/chatbase')
-      .setApiKey(chatbase.apiKey) // Your Chatbase API Key
-      .setPlatform(chatbase.platform); // The platform you are interacting with the user over
+    _chatbase = require('@google/chatbase');
   }
 
   return async (context, arg, ...otherArgs) => {
@@ -56,8 +54,9 @@ exports.createHandler = function createHandler({
 
     if (USE_CHATBASE) {
       let chatbaseMessage = _chatbase
+        .newMessage(chatbase.apiKey)
+        .setPlatform(chatbase.platform || context.platform || 'Unknown')
         .setAsTypeUser()
-        .newMessage()
         .setUserId(
           (context.session.user && context.session.user.id) || 'Unknown'
         )
@@ -105,8 +104,9 @@ exports.createHandler = function createHandler({
 
     if (USE_CHATBASE) {
       _chatbase
+        .newMessage(chatbase.apiKey)
+        .setPlatform(chatbase.platform || context.platform || 'Unknown')
         .setAsTypeAgent()
-        .newMessage()
         .setUserId(
           (context.session.user && context.session.user.id) || 'Unknown'
         )

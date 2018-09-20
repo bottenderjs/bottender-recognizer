@@ -1,3 +1,7 @@
+# 0.3.0 / 2018-09-20 
+
+* [new] support multi-platform bot
+
 # 0.2.2 / 2018-07-25
 
 * [new] add debug for chatbase
